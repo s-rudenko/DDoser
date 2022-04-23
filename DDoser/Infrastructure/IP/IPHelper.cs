@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -14,23 +13,19 @@ namespace DDoser.Infrastructure.IP
     {
         public static string GetMyCountryByIp()
         {
-            IpInfoModel ipInfo = new();
             try
             {
                 var httpClient = new HttpClient();
                 var ip = httpClient.GetStringAsync("https://api.ipify.org").GetAwaiter().GetResult();
 
-                string info = new WebClient().DownloadString("http://ipinfo.io/" + ip);
-                ipInfo = JsonConvert.DeserializeObject<IpInfoModel>(info);
-                RegionInfo myRI1 = new RegionInfo(ipInfo.Country);
-                ipInfo.Country = myRI1.EnglishName;
+                var info = new WebClient().DownloadString("http://ipinfo.io/" + ip);
+                var el = System.Text.Json.JsonDocument.Parse(info).RootElement;
+                return el.GetProperty("country").ToString() + el.GetProperty("city").ToString();
             }
             catch (Exception)
             {
-                ipInfo.Country = null;
+                return null;
             }
-
-            return ipInfo.Country;
         }
     }
 }
